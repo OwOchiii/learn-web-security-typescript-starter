@@ -53,6 +53,10 @@ export function createAccountRouter(deps: Dependencies): Router {
     const current = requireAuth(db, req, res);
     if (!current) return;
     res.type("html").send(renderAccountPage(current));
+    logEvent("account_accessed", {
+      userId: current.user.id,
+      email: current.user.email,
+    });
   });
 
   router.get("/account/totp", async (req, res) => {
