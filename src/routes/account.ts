@@ -56,6 +56,7 @@ export function createAccountRouter(deps: Dependencies): Router {
     logEvent("account_accessed", {
       userId: current.user.id,
       email: current.user.email,
+      expiresAt: current.session.expires_at
     });
   });
 
