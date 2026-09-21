@@ -18,9 +18,17 @@ export function setSessionCookie(
   response.cookie(SESSION_COOKIE_NAME, session.token, {
     ...sessionCookieOptions,
     expires: new Date(session.expires_at),
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
   });
 }
 
 export function clearSessionCookie(response: Response): void {
-  response.clearCookie(SESSION_COOKIE_NAME, sessionCookieOptions);
+  response.clearCookie(SESSION_COOKIE_NAME, {
+    ...sessionCookieOptions,
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+  });
 }
