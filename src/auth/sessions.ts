@@ -86,7 +86,7 @@ export function getCurrentSession(
     return undefined;
   }
 
-  if (storedSession.revoked_at == null) {
+  if (storedSession.revoked_at != null) {
     return undefined;
   }
 
