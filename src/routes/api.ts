@@ -7,6 +7,7 @@ import {
   listOrderItems,
   listOrdersForUser,
 } from "../orders/index.ts";
+import {findApiKey} from "../auth/apiKeys.ts";
 import { listAllProducts } from "../products.ts";
 
 export function createApiRouter(deps: Dependencies): Router {
@@ -56,6 +57,24 @@ export function createApiRouter(deps: Dependencies): Router {
       total_cents: order.total_cents,
       created_at: order.created_at,
     }));
+
+    const api_key = _req.header("x-api-key");
+    if (!api_key) {
+      res.status(401).json({ error: "API key required" });
+      return;
+    }
+
+    const api = findApiKey(db, api_key);
+    if (!api) {
+      res.status(401).json({ error: "Invalid API key" });
+      return;
+    }
+
+    if (api.scope !== "orders:read") {
+      res.status(403).json({ error: "Insufficient permissions" });
+      return;
+    }
+
 
     res.json({
       integration: "Warehouse Fulfillment Integration",
