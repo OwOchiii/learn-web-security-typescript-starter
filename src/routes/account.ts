@@ -43,6 +43,7 @@ import {
   renderTotpEnabledPage,
   renderTotpSetupPage,
 } from "../views/account.ts";
+import {verifyPassword} from "../auth/passwords.ts";
 
 export function createAccountRouter(deps: Dependencies): Router {
   const { db, keyring } = deps;
@@ -160,6 +161,19 @@ export function createAccountRouter(deps: Dependencies): Router {
 
   router.post("/account/email", (req, res) => {
     const current = requireAuth(db, req, res);
+    if (!current) return;
+    if (!verifyPassword(current.user.password_hash, req.body.currentPassword)) {
+      res
+        .status(403)
+        .type("html")
+        .send(
+          renderAccountPage(
+            current,
+            "Invalid current password.",
+          ),
+        );
+      return;
+    }
     if (!current) return;
     if (!csrfTokensMatch(current.session.csrf_token, req.body?.csrfToken)) {
       sendErrorPage(
