@@ -120,10 +120,14 @@ export function createPasskeyRouter(deps: Dependencies): Router {
 
     let verification;
     try {
-      verification = {
+      verification = await verifyAuthenticationResponse({
         response: passkeyVerificationInput.response,
-        expectedChallenge: challengeId,
-      };
+        expectedChallenge: stored.challenge,
+        expectedOrigin: rpOrigin,
+        expectedRPID: rpID,
+        requireUserVerification: true,
+        credential: passkeyVerificationInput.credential,
+      });
     } catch (error) {
       logEvent("passkey_login_failed", { credentialId, error: String(error) });
       res
