@@ -162,19 +162,6 @@ export function createAccountRouter(deps: Dependencies): Router {
   router.post("/account/email", (req, res) => {
     const current = requireAuth(db, req, res);
     if (!current) return;
-    if (!verifyPassword(current.user.password_hash, req.body.currentPassword)) {
-      res
-        .status(403)
-        .type("html")
-        .send(
-          renderAccountPage(
-            current,
-            "Invalid current password.",
-          ),
-        );
-      return;
-    }
-    if (!current) return;
     if (!csrfTokensMatch(current.session.csrf_token, req.body?.csrfToken)) {
       sendErrorPage(
         res,
@@ -185,16 +172,11 @@ export function createAccountRouter(deps: Dependencies): Router {
       return;
     }
     const currentPassword = String(req.body.currentPassword ?? "");
-    if (!currentPassword) {
+    if (!currentPassword || !verifyPassword(currentPassword, current.user.password_hash)) {
       res
         .status(403)
         .type("html")
-        .send(
-          renderAccountPage(
-            current,
-            "Re-enter your current password to change your email.",
-          ),
-        );
+        .send(renderAccountPage(current, "Re-enter your current password to change your email."));
       return;
     }
     const email = normalizeEmail(String(req.body.email ?? ""));
