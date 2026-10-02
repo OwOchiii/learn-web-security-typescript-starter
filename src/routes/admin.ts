@@ -1,7 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import type { DatabaseSync } from "node:sqlite";
 import type { Dependencies } from "../dependencies.ts";
-import type { CurrentSession } from "../auth/sessions.ts";
 import { sendErrorPage } from "../errors.ts";
 import {
   renderAdminDashboard,
