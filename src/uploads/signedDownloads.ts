@@ -43,7 +43,7 @@ function signDownload(
   _fileId: number,
   _expires: number,
 ): string {
-  const payload = "GET\n/files/:fileId/signed-download\nexpires=:expires";
+  const payload = `GET\n/files/${_fileId}/signed-download\nexpires=${_expires}`;
   return createHmac("sha256", _signingKey)
       .update(payload)
       .digest("hex");
