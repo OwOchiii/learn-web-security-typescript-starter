@@ -4,7 +4,6 @@ import {
   addProductToCart,
   getCartTotalCents,
   listCartItems,
-  MAX_CART_QUANTITY,
   updateCartItemQuantity,
 } from "../cart.ts";
 import { requireAuth } from "../auth/accessControl.ts";
