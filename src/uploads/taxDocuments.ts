@@ -56,15 +56,15 @@ export function storeTaxDocument(
   keyring: Keyring | undefined,
 ): StoredTaxDocument | undefined {
   mkdirSync(uploadDirectory, { recursive: true });
-  if (detectTaxDocumentType(buffer) === undefined) {
+  const docType = detectTaxDocumentType(buffer);
+  if (docType === undefined) {
     return undefined;
   }
-  const fileName = randomUUID();
+  const fileName = randomUUID() + docType.extension;
   const storagePath = join(uploadDirectory, fileName);
   writeFileSync(storagePath, encryptTaxDocument(buffer, keyring));
 
-
-  return { contentType: "application/octet-stream", storagePath };
+  return { contentType: docType.contentType, storagePath };
 }
 
 export function readTaxDocument(
