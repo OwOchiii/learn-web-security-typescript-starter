@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { sendErrorPage } from "./errors.ts";
+import {timingSafeEqual} from "node:crypto";
 
 const FORBIDDEN_MESSAGE = "This request did not come from the app.";
 
@@ -34,5 +35,17 @@ export function validateRequestOrigin(appOrigin: string): RequestHandler {
 }
 
 export function csrfTokensMatch(_expected: string, _actual: unknown): boolean {
-  return true;
+  if (typeof _actual !== "string") {
+    return false;
+  }
+
+  const buffer_expected = Buffer.from(_expected);
+  const buffer_actual = Buffer.from(_actual);
+
+  if (buffer_expected.length !== buffer_actual.length) {
+    return false;
+  }
+
+  return timingSafeEqual(buffer_expected, buffer_actual);
+  
 }
