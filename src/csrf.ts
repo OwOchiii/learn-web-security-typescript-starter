@@ -47,5 +47,5 @@ export function csrfTokensMatch(_expected: string, _actual: unknown): boolean {
   }
 
   return timingSafeEqual(buffer_expected, buffer_actual);
-  
+
 }
