@@ -49,7 +49,7 @@ export function createApp(deps: Dependencies): express.Express {
   app.use(express.json());
   app.use(createPawPalRouter(deps));
   app.use(validateRequestOrigin(deps.appOrigin));
-  const publicProductsCors = cors({ origin: true, methods: ["GET"] });
+  const publicProductsCors = cors({ origin: "*", methods: ["GET"], allowedHeaders: [] });
   app.options("/api/products", publicProductsCors);
   app.use("/api/products", publicProductsCors);
   app.use(createApiRouter(deps));
