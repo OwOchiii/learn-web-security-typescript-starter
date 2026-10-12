@@ -10,7 +10,7 @@ import {
   type OrderItem,
 } from "../orders/index.ts";
 import { findApiKey } from "../auth/apiKeys.ts";
-import {   listProducts, type Product} from "../products.ts";
+import {listProducts, type Product} from "../products.ts";
 
 type ProductResponse = {
   id: number;
