@@ -53,7 +53,7 @@ export function initDependencies(
     maxPublicProductResults: 50,
     downloadSigningKey: randomBytes(32),
     keyring: loadOptionalKeyring(env),
-    pawPalApiKey: requireEnv("PAW_PAL_API_KEY"),
+    pawPalApiKey: requireEnv("PAWPAL_API_KEY"),
   };
 
   return { ...values, db: openDatabase(values.databasePath) };
