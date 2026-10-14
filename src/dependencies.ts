@@ -18,7 +18,10 @@ export type Dependencies = {
 };
 
 function parseHexKey(value: string | undefined, name: string): Buffer {
-  if (!value || !/^[0-9a-fA-F]{64}$/.test(value)) {
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  if (!/^[0-9a-fA-F]{64}$/.test(value)) {
     throw new Error(`${name} must be exactly 64 hexadecimal characters`);
   }
   return Buffer.from(value, "hex");
