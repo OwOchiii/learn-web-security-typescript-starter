@@ -1,0 +1,16 @@
+.env
+.env.local
+.env.*.local
+.env.production
+.git/
+node_modules/
+dist/
+coverage/
+tmp/
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
+data/*.log
+data/bulk-tax-documents/
+data/uploads/
+!data/uploads/mystery-shack-tax-exemption.pdf
