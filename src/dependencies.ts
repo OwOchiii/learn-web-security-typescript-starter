@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { openDatabase } from "./db/index.ts";
-import { loadOptionalKeyring, type Keyring } from "./storage/keyring.ts";
+import { loadKeyring, type Keyring } from "./storage/keyring.ts";
 
 export type Dependencies = {
   appOrigin: string;
@@ -71,7 +71,7 @@ export function initDependencies(
     maxPublicProductResults: 50,
     trustProxyHops: parseProxyHops(env.TRUST_PROXY_HOPS),
     downloadSigningKey: parseHexKey(env.DOWNLOAD_SIGNING_KEY, "DOWNLOAD_SIGNING_KEY"),
-    keyring: loadOptionalKeyring(env),
+    keyring: loadKeyring(env),
     pawPalApiKey: requireEnv("PAWPAL_API_KEY"),
   };
 
