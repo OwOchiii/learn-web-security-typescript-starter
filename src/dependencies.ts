@@ -11,6 +11,7 @@ export type Dependencies = {
   maxRequestBodyBytes: number;
   maxUploadBytes: number;
   maxPublicProductResults: number;
+  trustProxyHops: number;
   downloadSigningKey: Buffer;
   keyring: Keyring | undefined;
   db: DatabaseSync;
@@ -31,6 +32,14 @@ function parseNonNegativeInteger(value: string, name: string): number {
   const parsed = Number(value);
   if (!Number.isSafeInteger(parsed) || parsed < 0) {
     throw new Error(`${name} must be a non-negative integer`);
+  }
+  return parsed;
+}
+
+function parseProxyHops(value: string | undefined): number {
+  const parsed = Number(value ?? "0");
+  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new Error("TRUST_PROXY_HOPS must be a non-negative integer");
   }
   return parsed;
 }
@@ -60,6 +69,7 @@ export function initDependencies(
     maxRequestBodyBytes: 32 * 1024,
     maxUploadBytes: 1024 * 1024,
     maxPublicProductResults: 50,
+    trustProxyHops: parseProxyHops(env.TRUST_PROXY_HOPS),
     downloadSigningKey: parseHexKey(env.DOWNLOAD_SIGNING_KEY, "DOWNLOAD_SIGNING_KEY"),
     keyring: loadOptionalKeyring(env),
     pawPalApiKey: requireEnv("PAWPAL_API_KEY"),
