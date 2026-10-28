@@ -47,3 +47,18 @@ export async function verifyPassword(
 }
 
 
+export function passwordNeedsRehash(passwordHash: string): boolean {
+  if (LEGACY_SHA256_PATTERN.test(passwordHash)) {
+    return true;
+  }
+
+  if (passwordHash.startsWith("$argon2id$")) {
+    try {
+      return argon2.needsRehash(passwordHash, currentArgon2Options);
+    } catch {
+      return false;
+    }
+  }
+
+  return true;
+}
