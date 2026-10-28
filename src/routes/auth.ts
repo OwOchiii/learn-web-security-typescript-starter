@@ -5,6 +5,7 @@ import {
   hashPassword,
   MAX_PASSWORD_LENGTH,
   verifyPassword,
+  passwordNeedsRehash,
 } from "../auth/passwords.ts";
 import {
   createPasswordResetToken,
@@ -39,6 +40,7 @@ import {
   findUserById,
   getTotpSecret,
   normalizeEmail,
+  updateUserPassword
 } from "../auth/users.ts";
 import {
   renderLoginPage,
@@ -168,6 +170,10 @@ export function createAuthRouter(deps: Dependencies): Router {
       return;
     }
 
+    if (passwordNeedsRehash(user.password_hash)) {
+      await updateUserPassword(db, user.id, password);
+    }
+
     const challengeToken = getTotpLoginChallengeToken(req.header("cookie"));
     abandonTotpLoginChallenge(db, req.header("cookie"));
     clearTotpSecret(db, user.id);
@@ -206,6 +212,10 @@ export function createAuthRouter(deps: Dependencies): Router {
         .type("html")
         .send(renderLoginPage("Invalid email or password", returnTo));
       return;
+    }
+
+    if (passwordNeedsRehash(user.password_hash)) {
+      await updateUserPassword(db, user.id, password);
     }
 
     const challengeToken = getTotpLoginChallengeToken(req.header("cookie"));
