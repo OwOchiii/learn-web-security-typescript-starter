@@ -6,7 +6,7 @@ type LogFields = Record<string, unknown>;
 const logPath = join(process.cwd(), "data", "bearly-secure.log");
 
 
-const redactedFields = new Set(["sessionId","resetToken","resetLink","secret","adminNotes","storagePath"]);
+const redactedFields = new Set(["sessionId","resetToken","resetLink","secret","adminNotes","storagePath","email","shippingName","shippingAddress","shippingCity","shippingRegion","shippingPostalCode","originalName"]);
 
 function redact(fields: LogFields): LogFields {
     return Object.fromEntries(

@@ -95,6 +95,7 @@ export function decryptWithKeyring(
   return decrypt(payload, key);
 }
 
+// String encrytion helpers return UTF-8 encoded strings, which are not safe for arbitrary binary data. Use with care.
 export function encryptStringWithKeyring(
   value: string,
   keyring: Keyring | undefined,
