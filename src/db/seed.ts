@@ -1,7 +1,10 @@
 import type { DatabaseSync } from "node:sqlite";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { hashPassword } from "../auth/passwords.ts";
 import { hashBackupCode } from "../auth/totpBackupCodes.ts";
 import { initDependencies } from "../dependencies.ts";
+import { storeTaxDocument } from "../uploads/taxDocuments.ts";
 import { resetDb } from "./reset.ts";
 
 const warehouseApiKeyHash =
@@ -59,7 +62,7 @@ for (const user of seedUserDefinitions) {
   });
 }
 
-function seedData(db: DatabaseSync, users: readonly SeedUser[]): void {
+function seedData(db: DatabaseSync, users: readonly SeedUser[], keyring: ReturnType<typeof initDependencies>["keyring"]): void {
   const insertUser = db.prepare(`
     INSERT INTO users (email, display_name, role, password_hash)
     VALUES (?, ?, ?, ?)
@@ -317,11 +320,16 @@ function seedData(db: DatabaseSync, users: readonly SeedUser[]): void {
     VALUES (?, ?, ?, ?)
   `);
 
+  const fixturePath = resolve("data", "fixtures", "mystery-shack-tax-exemption.pdf");
+  const fixtureBuffer = readFileSync(fixturePath);
+  const storedDocument = storeTaxDocument(fixtureBuffer, keyring);
+  if (!storedDocument) throw new Error("Failed to encrypt seeded tax document");
+
   insertUploadedFile.run(
     1,
     "mystery-shack-tax-exemption.pdf",
-    "data/uploads/mystery-shack-tax-exemption.pdf",
-    "application/pdf",
+    storedDocument.storagePath,
+    storedDocument.contentType,
   );
 
   const apiKeysTableExists =
@@ -344,7 +352,7 @@ function seedData(db: DatabaseSync, users: readonly SeedUser[]): void {
 
 const deps = initDependencies();
 try {
-  resetDb(deps.db, (db) => seedData(db, seededUsers));
+  resetDb(deps.db, (db) => seedData(db, seededUsers, deps.keyring));
   console.log(`Seeded ${deps.databasePath}`);
 } finally {
   deps.db.close();

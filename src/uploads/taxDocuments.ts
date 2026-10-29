@@ -57,11 +57,13 @@ export function storeTaxDocument(
   }
   const fileName = randomUUID() + ".enc";
   const storagePath = join(uploadDirectory, fileName);
-  const payload = encryptWithKeyring(buffer, requireKeyring(keyring));
-  writeFileSync(storagePath, serializeEncryptedPayload(payload));
+  writeFileSync(storagePath, encryptTaxDocument(buffer, requireKeyring(keyring)));
 
   return { contentType: docType.contentType, storagePath };
 }
+
+
+
 
 export function readTaxDocument(
   storagePath: string,
@@ -75,4 +77,8 @@ export function readTaxDocument(
 function requireKeyring(keyring: Keyring | undefined): Keyring {
   if (!keyring) throw new Error("Data encryption requires a configured keyring");
   return keyring;
+}
+
+export function encryptTaxDocument(buffer: Buffer, keyring: Keyring): Buffer {
+  return serializeEncryptedPayload(encryptWithKeyring(buffer, keyring));
 }

@@ -13,7 +13,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./
 COPY src/ /app/src
 COPY public/ /app/public
-COPY --chown=node:node data/uploads/mystery-shack-tax-exemption.pdf ./data/uploads/mystery-shack-tax-exemption.pdf
+COPY --chown=node:node data/fixtures/mystery-shack-tax-exemption.pdf ./data/fixtures/mystery-shack-tax-exemption.pdf
 
 RUN mkdir -p data/uploads data/bulk-tax-documents && \
     chown -R node:node data
