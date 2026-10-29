@@ -35,7 +35,7 @@ export class ArchiveImportError extends Error {
 }
 
 export function extractTaxDocumentArchive(
-  keyring: Keyring | undefined,
+  keyring: Keyring,
   buffer: Buffer,
 ): ExtractedTaxDocumentArchive {
   let entryCount = 0;
