@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Keyring } from "../storage/keyring.ts";
 import {randomUUID} from "node:crypto";
+import {decryptWithKeyring,deserializeEncryptedPayload,encryptWithKeyring,serializeEncryptedPayload} from "../storage/keyring.ts";
 
 const uploadDirectory = join(process.cwd(), "data", "uploads");
 
@@ -44,12 +45,6 @@ export function detectTaxDocumentType(
   return undefined;
 }
 
-export function encryptTaxDocument(
-  buffer: Buffer,
-  _keyring: Keyring | undefined,
-): Buffer {
-  return buffer;
-}
 
 export function storeTaxDocument(
   buffer: Buffer,
@@ -60,16 +55,24 @@ export function storeTaxDocument(
   if (docType === undefined) {
     return undefined;
   }
-  const fileName = randomUUID() + docType.extension;
+  const fileName = randomUUID() + ".enc";
   const storagePath = join(uploadDirectory, fileName);
-  writeFileSync(storagePath, encryptTaxDocument(buffer, keyring));
+  const payload = encryptWithKeyring(buffer, requireKeyring(keyring));
+  writeFileSync(storagePath, serializeEncryptedPayload(payload));
 
   return { contentType: docType.contentType, storagePath };
 }
 
 export function readTaxDocument(
   storagePath: string,
-  _keyring: Keyring | undefined,
+  keyring: Keyring | undefined,
 ): Buffer {
-  return readFileSync(storagePath);
+  const stored = readFileSync(storagePath);
+  const payload = deserializeEncryptedPayload(stored);
+  return decryptWithKeyring(payload, requireKeyring(keyring));
+}
+
+function requireKeyring(keyring: Keyring | undefined): Keyring {
+  if (!keyring) throw new Error("Data encryption requires a configured keyring");
+  return keyring;
 }
