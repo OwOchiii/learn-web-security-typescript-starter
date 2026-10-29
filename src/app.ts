@@ -22,6 +22,7 @@ import { createProductsRouter } from "./routes/products.ts";
 import { createStorefrontRouter } from "./routes/storefront.ts";
 import { createSupportRouter } from "./routes/support.ts";
 import { migrateSensitiveDataAtRest } from "./storage/migrations.ts";
+import {createRateLimiter} from "./security/rateLimit.ts";
 
 export function createApp(deps: Dependencies): express.Express {
   migrateSensitiveDataAtRest(deps.db, deps.keyring);
@@ -32,6 +33,8 @@ export function createApp(deps: Dependencies): express.Express {
     res.locals.cspNonce = randomBytes(16).toString("base64");
     next();
   });
+
+  app.use(createRateLimiter({ windowSeconds: 60, max: 100 }));
 
   app.use(
     helmet({
