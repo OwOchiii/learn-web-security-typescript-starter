@@ -74,6 +74,7 @@ export function createApp(deps: Dependencies): express.Express {
   app.use(validateRequestOrigin(deps.appOrigin));
   const publicProductsCors = cors({ origin: "*", methods: ["GET"], allowedHeaders: [] });
   app.options("/api/products", publicProductsCors);
+  app.use("/api/products", createRateLimiter({ windowSeconds: 60, max: 30 }));
   app.use("/api/products", publicProductsCors);
   app.use(createApiRouter(deps));
 
