@@ -22,19 +22,16 @@ import { createProductsRouter } from "./routes/products.ts";
 import { createStorefrontRouter } from "./routes/storefront.ts";
 import { createSupportRouter } from "./routes/support.ts";
 import { migrateSensitiveDataAtRest } from "./storage/migrations.ts";
-import {createRateLimiter} from "./security/rateLimit.ts";
 
 export function createApp(deps: Dependencies): express.Express {
   migrateSensitiveDataAtRest(deps.db, deps.keyring);
   const app = express();
-  app.set("trust proxy", deps.trustProxyHops);
+  app.set("trust proxy", deps.trustedProxyHops);
 
   app.use((_req, res, next) => {
     res.locals.cspNonce = randomBytes(16).toString("base64");
     next();
   });
-
-  app.use(createRateLimiter({ windowSeconds: 60, max: 100 }));
 
   app.use(
     helmet({
@@ -74,7 +71,6 @@ export function createApp(deps: Dependencies): express.Express {
   app.use(validateRequestOrigin(deps.appOrigin));
   const publicProductsCors = cors({ origin: "*", methods: ["GET"], allowedHeaders: [] });
   app.options("/api/products", publicProductsCors);
-  app.use("/api/products", createRateLimiter({ windowSeconds: 60, max: 30 }));
   app.use("/api/products", publicProductsCors);
   app.use(createApiRouter(deps));
 

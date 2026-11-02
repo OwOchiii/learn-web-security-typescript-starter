@@ -11,7 +11,7 @@ export type Dependencies = {
   maxRequestBodyBytes: number;
   maxUploadBytes: number;
   maxPublicProductResults: number;
-  trustProxyHops: number;
+  trustedProxyHops: number;
   downloadSigningKey: Buffer;
   keyring: Keyring | undefined;
   db: DatabaseSync;
@@ -69,7 +69,7 @@ export function initDependencies(
     maxRequestBodyBytes: 32 * 1024,
     maxUploadBytes: 1024 * 1024,
     maxPublicProductResults: 50,
-    trustProxyHops: parseProxyHops(env.TRUST_PROXY_HOPS),
+    trustedProxyHops: parseProxyHops(env.TRUST_PROXY_HOPS),
     downloadSigningKey: parseHexKey(env.DOWNLOAD_SIGNING_KEY, "DOWNLOAD_SIGNING_KEY"),
     keyring: loadKeyring(env),
     pawPalApiKey: requireEnv("PAWPAL_API_KEY"),

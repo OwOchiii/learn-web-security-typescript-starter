@@ -145,7 +145,8 @@ function validateRateLimiterOptions(options: RateLimiterOptions): void {
 }
 
 export function clientIpKey(req: Request): string {
-  return req.ip || req.socket.remoteAddress || "unknown";
+  const ip = req.ip || req.socket.remoteAddress || "unknown";
+  return ip;
 }
 
 export function canonicalEmailKey(req: Request): string {
