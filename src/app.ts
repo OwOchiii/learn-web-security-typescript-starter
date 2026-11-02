@@ -33,6 +33,9 @@ export function createApp(deps: Dependencies): express.Express {
     next();
   });
 
+  app.use(express.json({ limit: deps.maxRequestBodyBytes }));
+  app.use(express.urlencoded({ extended: false, limit: deps.maxRequestBodyBytes }));
+
   app.use(
     helmet({
       contentSecurityPolicy: {

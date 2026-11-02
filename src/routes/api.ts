@@ -10,7 +10,7 @@ import {
   type OrderItem,
 } from "../orders/index.ts";
 import { findApiKey } from "../auth/apiKeys.ts";
-import {listProducts, type Product} from "../products.ts";
+import {listProducts, listPublicProducts, type Product} from "../products.ts";
 
 type ProductResponse = {
   id: number;
@@ -104,7 +104,7 @@ export function createApiRouter(deps: Dependencies): Router {
   });
 
   router.get("/api/products", (_req, res) => {
-    res.json({ products: listProducts(db).map(toProductResponse) });
+    res.json({ products: listPublicProducts(db,deps.maxPublicProductResults).map(toProductResponse) });
   });
 
   router.get("/api/integrations/warehouse/orders", (_req, res) => {

@@ -1,7 +1,8 @@
 import multer from "multer";
 
-export function createUploadMiddleware(fieldName: string) {
-  return multer({
-    storage: multer.memoryStorage(),
-  }).single(fieldName);
+export function createUploadMiddleware(fieldName: string,maxBytes: number) {
+  const upload = multer({
+    limits: { fileSize: maxBytes },
+  });
+  return upload.single(fieldName);
 }
