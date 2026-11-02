@@ -23,6 +23,8 @@ import {
   findOrderById,
   InsufficientInventoryError,
 } from "../orders/index.ts";
+import { isAcornFulfillmentTimeout,reserveAcornFulfillmentWithTimeout } from "../integrations/acornFulfillment.ts";
+import { error } from "console";
 
 export function sendFulfillmentTimeout(
   response: Response,
@@ -143,9 +145,17 @@ export function createCheckoutRouter(deps: Dependencies): Router {
       region: shippingRegion,
       postalCode: shippingPostalCode,
     };
-    await reserveAcornFulfillment(shippingDetails, {
-      delayMs: deps.acornFulfillmentDelayMs,
-    });
+    try {
+      await reserveAcornFulfillmentWithTimeout(shippingDetails, {
+        delayMs: deps.acornFulfillmentDelayMs,
+      });
+    } catch (error) {
+      if (!isAcornFulfillmentTimeout(error)) throw error;
+      sendFulfillmentTimeout(res, items, current.session.csrf_token, current.user.display_name);
+      return;
+    }
+    
+
 
     items = listCartItems(db, current.user.id);
     if (items.length === 0) {

@@ -15,6 +15,8 @@ try {
     deps.db.close();
     throw error;
   });
+  server.headersTimeout = 60_000;
+  server.requestTimeout = 60_000;
 } catch (error) {
   server?.close();
   deps.db.close();
