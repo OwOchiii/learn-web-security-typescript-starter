@@ -11,6 +11,8 @@ import {
 } from "../orders/index.ts";
 import { findApiKey } from "../auth/apiKeys.ts";
 import { listPublicProducts, type Product} from "../products.ts";
+import { sendApiKeyQuotaExhausted, setApiKeyQuotaHeaders,toApiKeyQuotaResponse } from "./apiKeyQuota.ts";
+import {consumeApiKeyQuota} from "../auth/apiKeyUsage.ts";
 
 type ProductResponse = {
   id: number;
@@ -125,10 +127,21 @@ export function createApiRouter(deps: Dependencies): Router {
       return;
     }
 
+    const quota = consumeApiKeyQuota(db, api.id);
+    if (!quota.allowed) {
+      sendApiKeyQuotaExhausted(res, quota);
+      return;
+    }
+
+    setApiKeyQuotaHeaders(res, quota);
+
+    
+
     res.json({
       integration: "Warehouse Fulfillment Integration",
       orders: listAllOrders(db).map(toOrderResponse),
-    });
+      quota: toApiKeyQuotaResponse(quota),
+    },);
   });
 
   return router;
