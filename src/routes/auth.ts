@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from "express";
 import type { Dependencies } from "../dependencies.ts";
 import { safeReturnTo } from "../auth/accessControl.ts";
 import { sendErrorPage } from "../errors.ts";
-import { createRateLimiter, canonicalEmailKey } from "../security/rateLimit.ts";
+import { createRateLimiter, canonicalEmailKey, clientIpKey } from "../security/rateLimit.ts";
 import {
   hashPassword,
   MAX_PASSWORD_LENGTH,
@@ -64,12 +64,18 @@ type AuthenticationLogFields = {
 };
 
 function logAuthenticationEvent(
-  _req: Request,
-  _res: Response,
+  req: Request,
+  res: Response,
   eventName: "login_attempt" | "password_reset_request",
   fields: AuthenticationLogFields,
 ): void {
-  logEvent(eventName, fields);
+  logEvent(eventName, {
+    ...fields,
+    requestId: res.locals.requestId,
+    sourceIp: clientIpKey(req),
+    userId: fields.userId ?? null,
+    outcome: fields.success ? "success" : "failure",
+  });
 }
 
 export function createAuthRouter(deps: Dependencies): Router {

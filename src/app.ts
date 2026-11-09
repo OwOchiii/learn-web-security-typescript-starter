@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -28,6 +28,13 @@ export function createApp(deps: Dependencies): express.Express {
   migrateSensitiveDataAtRest(deps.db, deps.keyring);
   const app = express();
   app.set("trust proxy", deps.trustedProxyHops);
+
+  app.use((_req, res, next) => {
+    const requestId = randomUUID();
+    res.locals.requestId = requestId;
+    res.setHeader("X-Request-ID", requestId);
+    next();
+  });
 
   app.use((_req, res, next) => {
     res.locals.cspNonce = randomBytes(16).toString("base64");
