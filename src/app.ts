@@ -76,6 +76,15 @@ export function createApp(deps: Dependencies): express.Express {
     res.json({ ok: true, app: "bearly-secure" });
   });
 
+  app.get("/.well-known/security.txt", (_req, res) => {
+    const expires = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
+    res.type("text/plain").send(
+`Contact: mailto:security@bearlysecure.example
+Policy: https://bearlysecure.example/security-policy
+Expires: ${expires}
+`);
+  });
+
   app.use(loadShedder);
   app.use(express.static("public"));
   app.use(

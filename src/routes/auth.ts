@@ -56,27 +56,13 @@ import {
 } from "../views/auth.ts";
 import { logEvent } from "../logger.ts";
 import { protectSignupFromBots } from "../security/botRisk.ts";
+import { createAuthAlertThreshold } from "../observability/authAlerts.ts";
 
 type AuthenticationLogFields = {
   success: boolean;
   userId?: number;
   [key: string]: unknown;
 };
-
-function logAuthenticationEvent(
-  req: Request,
-  res: Response,
-  eventName: "login_attempt" | "password_reset_request",
-  fields: AuthenticationLogFields,
-): void {
-  logEvent(eventName, {
-    ...fields,
-    requestId: res.locals.requestId,
-    sourceIp: clientIpKey(req),
-    userId: fields.userId ?? null,
-    outcome: fields.success ? "success" : "failure",
-  });
-}
 
 export function createAuthRouter(deps: Dependencies): Router {
   const { db, appOrigin } = deps;
@@ -123,6 +109,41 @@ export function createAuthRouter(deps: Dependencies): Router {
       sendErrorPage(res, 429, "Too Many Requests", "Too many password reset attempts for this account. Try again later.");
     },
   });
+
+  const recordFailedLogin = createAuthAlertThreshold({
+    signal: "failed_logins",
+    threshold: 3,
+    windowSeconds: 300,
+  });
+
+  const recordPasswordResetRequest = createAuthAlertThreshold({
+    signal: "password_reset_requests",
+    threshold: 3,
+    windowSeconds: 600,
+  });
+
+  function logAuthenticationEvent(
+    req: Request,
+    res: Response,
+    eventName: "login_attempt" | "password_reset_request",
+    fields: AuthenticationLogFields,
+  ): void {
+    const userId = fields.userId ?? null;
+    const requestId = String(res.locals.requestId);
+    logEvent(eventName, {
+      ...fields,
+      requestId,
+      sourceIp: clientIpKey(req),
+      userId,
+      outcome: fields.success ? "success" : "failure",
+    });
+    if (eventName === "login_attempt" && !fields.success) {
+      recordFailedLogin(req, requestId, userId);
+    }
+    if (eventName === "password_reset_request") {
+      recordPasswordResetRequest(req, requestId, userId);
+    }
+  }
 
   const MIN_PASSWORD_LENGTH = 8;
   const VERIFICATION_RESTART_MESSAGE =
@@ -583,3 +604,4 @@ export function createAuthRouter(deps: Dependencies): Router {
 
   return router;
 }
+
