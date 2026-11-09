@@ -22,6 +22,7 @@ import { createProductsRouter } from "./routes/products.ts";
 import { createStorefrontRouter } from "./routes/storefront.ts";
 import { createSupportRouter } from "./routes/support.ts";
 import { migrateSensitiveDataAtRest } from "./storage/migrations.ts";
+import { createLoadShedder } from "./security/loadShedding.ts";
 
 export function createApp(deps: Dependencies): express.Express {
   migrateSensitiveDataAtRest(deps.db, deps.keyring);
@@ -35,6 +36,11 @@ export function createApp(deps: Dependencies): express.Express {
 
   app.use(express.json({ limit: deps.maxRequestBodyBytes }));
   app.use(express.urlencoded({ extended: false, limit: deps.maxRequestBodyBytes }));
+
+  const loadShedder = createLoadShedder({
+    maxConcurrent: 50,
+    retryAfterSeconds: 1,
+  });
 
   app.use(
     helmet({
@@ -62,6 +68,8 @@ export function createApp(deps: Dependencies): express.Express {
   app.get("/health", (_req, res) => {
     res.json({ ok: true, app: "bearly-secure" });
   });
+
+  app.use(loadShedder);
   app.use(express.static("public"));
   app.use(
     "/vendor/simplewebauthn",

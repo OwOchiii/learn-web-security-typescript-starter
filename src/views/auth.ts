@@ -79,6 +79,13 @@ export function renderSignupPage(error?: string): string {
     `<nav class="page-nav" aria-label="Primary"><a class="brand-link" href="/">Bearly Secure</a></nav>
       <h1 class="auth-heading">Create Account</h1>
       <div class="form-message auth-message" aria-live="polite">${errorMarkup(error)}</div>
+      <label hidden
+  >Leave this field blank<input
+    name="companyWebsite"
+    type="text"
+    tabindex="-1"
+    autocomplete="off"
+/></label>
       <form method="post" action="/signup" class="auth-form">
         <label>Name<input name="displayName" type="text" autocomplete="name" required autofocus></label>
         <label>Email<input name="email" type="email" autocomplete="email" required></label>
